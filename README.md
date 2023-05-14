@@ -1,13 +1,13 @@
 # Grafos2_aDecidir
 
-**Número da Lista**: X<br>
-**Conteúdo da Disciplina**: XXXXXXXXXX<br>
+**Número da Lista**: 4<br>
+**Conteúdo da Disciplina**: Grafos 2<br>
 
 ## Alunos
 |Matrícula | Aluno |
 | -- | -- |
 | 14/0158278  |  Pedro Helias Carlos |
-| xx/xxxxxx  |  xxxx xxxx xxxxx |
+| 17/0069991	 |  João Victor Max Bisinotti de Oliveira |
 
 ## Sobre 
 Descreva os objetivos do seu projeto e como ele funciona. 

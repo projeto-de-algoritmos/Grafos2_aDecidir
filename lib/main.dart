@@ -1,5 +1,7 @@
+import 'package:app_carona_fga/pages/destination_page.dart';
 import 'package:flutter/material.dart';
 import 'pages/map_page.dart';
+import 'pages/rides_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +23,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
       ),
       // First screen of our app
-      home: MapPage(),
+      home: DestinationPage(),
     );
   }
 }

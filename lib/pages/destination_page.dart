@@ -34,7 +34,7 @@ class _DestinationPageState extends State<DestinationPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RidesPage(destination: destination!),
+                    builder: (context) => RidesPage(origin: origin!, destination: destination!),
                   ),
                 );
               },

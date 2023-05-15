@@ -8,7 +8,7 @@ import 'map_page.dart';
 class RidesPage extends StatefulWidget {
   LatLng origin;
   LatLng destination;
-  RidesPage({Key? key, , required this.origin, required this.destination}) : super(key: key);
+  RidesPage({Key? key, required this.origin, required this.destination}) : super(key: key);
 
   @override
   State<RidesPage> createState() => _RidesPageState();

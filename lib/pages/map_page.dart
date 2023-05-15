@@ -18,18 +18,21 @@ class MapPage extends StatefulWidget {
 class MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
   PolylinePoints polylinePoints = PolylinePoints();
-  final String _apiKey = 'AIzaSyAa-qzvR0N3bd-BZObhwVvpnU58FV-MLYA';
 
-  // Define a posição inicial do mapa com as coordenadas da FGA
+  String googleAPiKey = 'AIzaSyAa-qzvR0N3bd-BZObhwVvpnU58FV-MLYA';
+
+  // Define a posição inicial do mapa com as coordenadas padrão
   static const LatLng _college = LatLng(-15.986986229268071, -48.0449563593817);
   static const LatLng _home = LatLng(-16.02843565698605, -48.060879729878614);
   static const LatLng _center = LatLng(-15.994680101187646, -48.052834596234334);
-  final Set<Marker> _markers = {};
+  double distance = 0.0;
+  Set<Marker> markers = {};
+  Map<PolylineId, Polyline> polylines = {};
 
   @override
   void initState() {
     super.initState();
-    _markers.add(Marker(
+    markers.add(Marker(
       markerId: MarkerId(_college.toString()),
       position: _college,
       infoWindow: const InfoWindow(
@@ -38,7 +41,7 @@ class MapPageState extends State<MapPage> {
       icon: BitmapDescriptor.defaultMarker,
     ));
 
-    _markers.add(Marker(
+    markers.add(Marker(
       markerId: MarkerId(_home.toString()),
       position: _home,
       infoWindow: const InfoWindow(
@@ -51,8 +54,8 @@ class MapPageState extends State<MapPage> {
   // Adiciona um marcador quando o mapa é clicado
   _onMapTapped(LatLng position) {
     setState(() {
-      if (_markers.length - 2 < widget.ridesCount) {
-        _markers.add(
+      if (markers.length - 2 < widget.ridesCount) {
+        markers.add(
           Marker(
             markerId: MarkerId(position.toString()),
             position: position,
@@ -74,33 +77,74 @@ class MapPageState extends State<MapPage> {
             (1 - cos((lng2 - lng1) * p)) / 2;
     return 12742 * asin(sqrt(a));
   }
-  // Calcula as rotas entre os pontos
-  Future<List<Polyline>> _getPolylines(List<LatLng> positions) async {
-    List<Polyline> polylines = [];
-    for (int i = 0; i < positions.length - 1; i++) {
-      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        _apiKey,
-        PointLatLng(positions[i].latitude, positions[i].longitude),
-        PointLatLng(positions[i + 1].latitude, positions[i + 1].longitude),
-        travelMode: TravelMode.driving,
-      );
 
-      if (result.points.isNotEmpty) {
-        // Transforma a lista de pontos em uma lista de LatLng
-        List<LatLng> polylineCoordinates = [];
-        for (PointLatLng point in result.points) {
-          polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+  Future<List<Polyline>> _getPolylines(List<LatLng> positions, LatLng origin, LatLng destination) async {
+    List<Polyline> polylines = [];
+    List<LatLng> polylineCoordinates = [];
+    LatLng? closestMarker;
+    double closestDistance = double.infinity;
+
+    // Cria uma rota entre a origem e o destino
+    Polyline originDestinationPolyline = Polyline(
+      polylineId: const PolylineId('originDestinationRoute'),
+      color: Colors.blue,
+      points: [origin, destination],
+    );
+
+    polylines.add(originDestinationPolyline);
+
+    // Cria rota incluindo as caronas
+    if(widget.ridesCount > 0) {
+      polylineCoordinates.add(origin); // Adiciona a origem na lista de coordenadas
+      positions.remove(origin);
+      positions.remove(destination);
+
+      // Encontra o marcador mais próximo da origem
+      for (LatLng marker in positions) {
+        double distance = calculateDistance(origin, marker);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestMarker = marker;
+        }
+      }
+
+      // Adiciona o marcador mais próximo e a origem como ponto na rota
+      if (closestMarker != null) {
+        polylineCoordinates.add(closestMarker);
+        positions.remove(closestMarker);
+      }
+
+      while (positions.isNotEmpty) {
+        closestDistance = double.infinity;
+        LatLng? currentMarker;
+
+        // Encontra o marcador mais próximo do marcador atual
+        for (LatLng marker in positions) {
+          double distance = calculateDistance(polylineCoordinates.last, marker);
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            currentMarker = marker;
+          }
         }
 
-        // Adiciona a polyline à lista de polylines
-        Polyline polyline = Polyline(
-          polylineId: PolylineId(positions[i].toString() + positions[i + 1].toString()),
-          color: Colors.red,
-          points: polylineCoordinates,
-        );
-        polylines.add(polyline);
+        // Adiciona marcador mais proximo na rota
+        if (currentMarker != null) {
+          polylineCoordinates.add(currentMarker);
+          positions.remove(currentMarker);
+        }
       }
+      polylineCoordinates.add(destination);
+
+      // Cria a polyline com as coordenadas
+      Polyline polyline = Polyline(
+        polylineId: const PolylineId('route'),
+        color: Colors.red,
+        points: polylineCoordinates,
+      );
+
+      polylines.add(polyline);
     }
+
     return polylines;
   }
 
@@ -119,20 +163,25 @@ class MapPageState extends State<MapPage> {
               target: _center,
               zoom: 13,
             ),
-            markers: _markers,
+            markers: markers,
             onTap: _onMapTapped, // Adiciona um listener de clique no mapa
+            polylines: Set<Polyline>.of(polylines.values), // Adiciona as polylines ao mapa
           ),
         ),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               List<LatLng> positions = [];
-              for (Marker marker in _markers) {
+              for (Marker marker in markers) {
                 positions.add(marker.position);
               }
-              Future<List<Polyline>> polylines = _getPolylines(positions);
-              // Faça algo com as rotas obtidas
+              List<Polyline> calculatedPolylines = await _getPolylines(positions, widget.origin, widget.destination);
+              setState(() {
+                for (Polyline polyline in calculatedPolylines) {
+                  polylines[polyline.polylineId] = polyline;
+                }
+              });
             },
             child: const Text('Calcular Rota'),
           ),
@@ -141,3 +190,11 @@ class MapPageState extends State<MapPage> {
     );
   }
 }
+
+
+
+
+
+
+
+

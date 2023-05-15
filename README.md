@@ -1,4 +1,4 @@
-# Grafos2_aDecidir
+# Grafos2_rota_carona
 
 **Número da Lista**: 4<br>
 **Conteúdo da Disciplina**: Grafos 2<br>

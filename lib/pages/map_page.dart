@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
+import 'destination_page.dart';
+
 
 class MapPage extends StatefulWidget {
   final LatLng destination;
@@ -18,6 +20,7 @@ class MapPage extends StatefulWidget {
 class MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
   PolylinePoints polylinePoints = PolylinePoints();
+  bool showCalculateButton = true;
 
   String googleAPiKey = 'AIzaSyAa-qzvR0N3bd-BZObhwVvpnU58FV-MLYA';
 
@@ -25,7 +28,6 @@ class MapPageState extends State<MapPage> {
   static const LatLng _college = LatLng(-15.986986229268071, -48.0449563593817);
   static const LatLng _home = LatLng(-16.02843565698605, -48.060879729878614);
   static const LatLng _center = LatLng(-15.994680101187646, -48.052834596234334);
-  double distance = 0.0;
   Set<Marker> markers = {};
   Map<PolylineId, Polyline> polylines = {};
 
@@ -65,6 +67,7 @@ class MapPageState extends State<MapPage> {
       }
     });
   }
+
   double calculateDistance(LatLng pos1, LatLng pos2) {
     double lat1 = pos1.latitude;
     double lng1 = pos1.longitude;
@@ -76,6 +79,14 @@ class MapPageState extends State<MapPage> {
         cos(lat1 * p) * cos(lat2 * p) *
             (1 - cos((lng2 - lng1) * p)) / 2;
     return 12742 * asin(sqrt(a));
+  }
+
+  void _restartApp() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const DestinationPage()),
+          (route) => false,
+    );
   }
 
   Future<List<Polyline>> _getPolylines(List<LatLng> positions, LatLng origin, LatLng destination) async {
@@ -133,6 +144,7 @@ class MapPageState extends State<MapPage> {
           positions.remove(currentMarker);
         }
       }
+
       polylineCoordinates.add(destination);
 
       // Cria a polyline com as coordenadas
@@ -168,26 +180,43 @@ class MapPageState extends State<MapPage> {
             polylines: Set<Polyline>.of(polylines.values), // Adiciona as polylines ao mapa
           ),
         ),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () async {
-              List<LatLng> positions = [];
-              for (Marker marker in markers) {
-                positions.add(marker.position);
-              }
-              List<Polyline> calculatedPolylines = await _getPolylines(positions, widget.origin, widget.destination);
-              setState(() {
-                for (Polyline polyline in calculatedPolylines) {
-                  polylines[polyline.polylineId] = polyline;
-                }
-              });
-            },
-            child: const Text('Calcular Rota'),
-          ),
-        ),
+        buildBottomWidget(),
       ],
     );
+  }
+
+  Widget buildBottomWidget() {
+    if (showCalculateButton) {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: () async {
+            List<LatLng> positions = [];
+            for (Marker marker in markers) {
+              positions.add(marker.position);
+            }
+            List<Polyline> calculatedPolylines = await _getPolylines(positions, widget.origin, widget.destination);
+            setState(() {
+              for (Polyline polyline in calculatedPolylines) {
+                polylines[polyline.polylineId] = polyline;
+              }
+              showCalculateButton = false;
+            });
+          },
+          child: const Text('Calcular Rota'),
+        ),
+      );
+    } else {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+              onPressed: () {
+                _restartApp();
+              },
+              child: const Text('Reiniciar'),
+            ),
+      );
+    }
   }
 }
 

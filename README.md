@@ -9,8 +9,11 @@
 | 14/0158278  |  Pedro Helias Carlos |
 | 17/0069991	 |  João Victor Max Bisinotti de Oliveira |
 
-## Sobre 
-Descreva os objetivos do seu projeto e como ele funciona. 
+## Sobre
+
+O objetivo do projeto Carona é ser um aplicativo pessoal de caronas, no qual o usuário pode selecionar seu destino (casa ou faculdade) e indicar quantas caronas dará naquela viagem (até 4). O aplicativo então exibe um mapa no qual o usuário  coloca marcadores para indicar as localizações das caronas. Os pontos de origem e destino já estarão marcados no mapa.
+Após os marcadores terem sido colocados no mapa, o usuário pode clicar em um botão para calcular a rota. O aplicativo calculará duas rotas diferentes: uma rota entre o destino final e o ponto de partida original(azul) e outra rota que inclui as caronas(vermelha). Ambas as rotas serão desenhadas no mapa, permitindo que o usuário visualize o trajeto.
+
 
 ## Screenshots
 ![Passo 1](./app_images/image1.png)
@@ -20,7 +23,7 @@ Descreva os objetivos do seu projeto e como ele funciona.
 ![Passo_5](./app_images/image5.png)
 
 
-## Instalação 
+## Instalação
 **Linguagem**: Dart<br>
 **Framework**: Flutter<br>
 
@@ -29,11 +32,12 @@ Descreva os objetivos do seu projeto e como ele funciona.
 3. Execute o comando `flutter pub get` no diretório raiz do projeto para instalar as dependências necessárias
 4. Conecte seu dispositivo móvel ao computador ou inicie um emulador de dispositivo móvel ou selecione o navegador(Chrome(web)) como Flutter Device.
 5. Execute o comando `flutter run` no diretório raiz do projeto para iniciar o aplicativo
-## Uso 
-Explique como usar seu projeto caso haja algum passo a passo após o comando de execução.
 
-## Outros 
-Quaisquer outras informações sobre seu projeto podem ser descritas abaixo.
-
+## Uso
+Após executar o aplicativo, o usuário deve informar seu destino.
+Em seguida deve informar quantas caronas vai dar(0 a 4). 
+Então terá que marcar os locais das caronas no mapa, caso hajam.
+Clica no botão 'Calcular rota' e visualiza no mapa o desenho das rotas.
+Clica no botão 'Reiniciar' para recomeçar.
 
 
